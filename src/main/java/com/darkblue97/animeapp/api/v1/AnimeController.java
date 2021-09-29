@@ -6,7 +6,6 @@ import com.darkblue97.animeapp.exceptions.NotFoundException;
 import com.darkblue97.animeapp.service.AnimeService;
 import com.darkblue97.animeapp.utils.GenerationUUID;
 import com.darkblue97.animeapp.utils.response.ResponseEntityBuilderResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

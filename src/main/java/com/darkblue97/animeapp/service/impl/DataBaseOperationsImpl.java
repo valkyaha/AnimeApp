@@ -3,8 +3,9 @@ package com.darkblue97.animeapp.service.impl;
 import com.darkblue97.animeapp.domain.Anime;
 import com.darkblue97.animeapp.dto.AnimeDTO;
 import com.darkblue97.animeapp.exceptions.NotFoundException;
-import com.darkblue97.animeapp.mappers.AnimeMapperImpl;
+import com.darkblue97.animeapp.mappers.impl.AnimeMapper;
 import com.darkblue97.animeapp.repository.AnimeRepository;
+import com.darkblue97.animeapp.repository.StudioRepository;
 import com.darkblue97.animeapp.service.DAOInterface;
 import com.darkblue97.animeapp.utils.GenerationUUID;
 import org.springframework.data.domain.*;
@@ -15,11 +16,13 @@ import java.util.*;
 @Service
 public class DataBaseOperationsImpl implements DAOInterface<AnimeDTO> {
 
-    private final AnimeMapperImpl animeMapper = new AnimeMapperImpl();
     private final AnimeRepository animeRepository;
 
-    public DataBaseOperationsImpl(AnimeRepository animeRepository) {
+    private final StudioRepository studioRepository;
+
+    public DataBaseOperationsImpl(AnimeRepository animeRepository, StudioRepository studioRepository) {
         this.animeRepository = animeRepository;
+        this.studioRepository = studioRepository;
     }
 
     @Override
@@ -30,7 +33,7 @@ public class DataBaseOperationsImpl implements DAOInterface<AnimeDTO> {
             throw new NotFoundException("Anime not found");
         }
 
-        return animeMapper.sourceToDestination(optionalAnime.get());
+        return AnimeMapper.fromAnimeToDto(optionalAnime.get());
     }
 
     @Override
@@ -41,7 +44,9 @@ public class DataBaseOperationsImpl implements DAOInterface<AnimeDTO> {
         if (pagedResult.hasContent()) {
 
             List<AnimeDTO> animeDTOS = new ArrayList<>();
-            pagedResult.getContent().forEach(k -> animeDTOS.add(new AnimeMapperImpl().sourceToDestination(k)));
+            pagedResult.getContent().forEach(
+                    k -> animeDTOS.add(AnimeMapper.fromAnimeToDto(k))
+            );
             return new PageImpl<>(animeDTOS, paging, pagedResult.getTotalElements());
 
         } else {
@@ -51,20 +56,22 @@ public class DataBaseOperationsImpl implements DAOInterface<AnimeDTO> {
 
     @Override
     public void save(AnimeDTO objetToSave) {
-        Anime anime = animeMapper.destinationToSource(objetToSave);
-        anime.setId(GenerationUUID.generate());
+        Anime anime = AnimeMapper.fromDtoToAnime(objetToSave);
+        anime.getGenres().forEach(k -> k.setId(GenerationUUID.generate()));
+        anime.getStudio().setId(GenerationUUID.generate());
+
         animeRepository.save(anime);
     }
 
     @Override
     public void delete(AnimeDTO objectToDelete) throws NotFoundException {
         AnimeDTO animeDTO = get(objectToDelete.getId());
-        animeRepository.delete(animeMapper.destinationToSource(animeDTO));
+        animeRepository.delete(AnimeMapper.fromDtoToAnime(animeDTO));
     }
 
     @Override
     public AnimeDTO update(AnimeDTO objectToUpdate) throws NotFoundException {
-        Anime anime = animeMapper.destinationToSource(get(objectToUpdate.getId()));
+        Anime anime = AnimeMapper.fromDtoToAnime(get(objectToUpdate.getId()));
 
         anime.setDateAdded(objectToUpdate.getDateAdded());
         anime.setDateFinished(objectToUpdate.getDateFinished());
@@ -77,6 +84,7 @@ public class DataBaseOperationsImpl implements DAOInterface<AnimeDTO> {
         anime.setGenres(objectToUpdate.getGenres());
 
         animeRepository.save(anime);
-        return animeMapper.sourceToDestination(anime);
+
+        return AnimeMapper.fromAnimeToDto(anime);
     }
 }
