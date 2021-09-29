@@ -39,3 +39,4 @@ out/
 
 ### Docker folders ###
 /docker/jenkins_home
+/.jpb/jpb-settings.xml
