@@ -33,6 +33,9 @@ public class Anime {
     @Column(nullable = false)
     private boolean seen;
 
+    @Column(nullable = false)
+    private boolean pending;
+
     @Column(nullable = false, updatable = false)
     @CreatedDate
     private LocalDateTime dateAdded;

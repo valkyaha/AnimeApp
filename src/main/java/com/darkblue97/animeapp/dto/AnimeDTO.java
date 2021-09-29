@@ -12,11 +12,11 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 public class AnimeDTO {
-
     private UUID id;
     private String japaneseName;
     private Byte qualification;
     private boolean seen;
+    private boolean pending;
     private LocalDateTime dateAdded;
     private LocalDateTime dateUpdated;
     private LocalDateTime dateStarted;
