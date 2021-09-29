@@ -1,6 +1,7 @@
 package com.darkblue97.animeapp.service;
 
 import com.darkblue97.animeapp.exceptions.NotFoundException;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -15,4 +16,6 @@ public interface DAOInterface<T> {
     void delete(T objectToDelete) throws NotFoundException;
 
     T update(T objectToUpdate) throws NotFoundException;
+
+    Page<T> getAll(Integer pageNo, Integer pageSize, String sortBy);
 }

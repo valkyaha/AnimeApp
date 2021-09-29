@@ -7,18 +7,18 @@ import com.darkblue97.animeapp.mappers.AnimeMapperImpl;
 import com.darkblue97.animeapp.repository.AnimeRepository;
 import com.darkblue97.animeapp.service.DAOInterface;
 import com.darkblue97.animeapp.utils.GenerationUUID;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
-public class DataBaseOperations implements DAOInterface<AnimeDTO> {
+public class DataBaseOperationsImpl implements DAOInterface<AnimeDTO> {
 
     private final AnimeMapperImpl animeMapper = new AnimeMapperImpl();
     private final AnimeRepository animeRepository;
 
-    public DataBaseOperations(AnimeRepository animeRepository) {
+    public DataBaseOperationsImpl(AnimeRepository animeRepository) {
         this.animeRepository = animeRepository;
     }
 
@@ -31,6 +31,22 @@ public class DataBaseOperations implements DAOInterface<AnimeDTO> {
         }
 
         return animeMapper.sourceToDestination(optionalAnime.get());
+    }
+
+    @Override
+    public Page<AnimeDTO> getAll(Integer pageNo, Integer pageSize, String sortBy) {
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        Page<Anime> pagedResult = animeRepository.findAll(paging);
+
+        if (pagedResult.hasContent()) {
+
+            List<AnimeDTO> animeDTOS = new ArrayList<>();
+            pagedResult.getContent().forEach(k -> animeDTOS.add(new AnimeMapperImpl().sourceToDestination(k)));
+            return new PageImpl<>(animeDTOS, paging, pagedResult.getTotalElements());
+
+        } else {
+            return new PageImpl<>(Collections.emptyList(), paging, pagedResult.getTotalElements());
+        }
     }
 
     @Override
@@ -59,8 +75,8 @@ public class DataBaseOperations implements DAOInterface<AnimeDTO> {
         anime.setStudio(objectToUpdate.getStudio());
         anime.setSeen(objectToUpdate.isSeen());
         anime.setGenres(objectToUpdate.getGenres());
-        animeRepository.save(anime);
 
+        animeRepository.save(anime);
         return animeMapper.sourceToDestination(anime);
     }
 }
