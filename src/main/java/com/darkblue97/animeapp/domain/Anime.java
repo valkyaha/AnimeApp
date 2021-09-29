@@ -1,30 +1,29 @@
 package com.darkblue97.animeapp.domain;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "animes")
 public class Anime {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, columnDefinition = "BINARY(16)")
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
     private UUID id;
 
     private String japaneseName;
@@ -33,34 +32,31 @@ public class Anime {
     @Column(nullable = false)
     private boolean seen;
 
+    @Column(nullable = false)
+    private boolean pending;
+
     @Column(nullable = false, updatable = false)
     @CreatedDate
     private LocalDateTime dateAdded;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     @LastModifiedDate
     private LocalDateTime dateUpdated;
-
-    @Column(nullable = false)
     private LocalDateTime dateStarted;
-
-    @Column(nullable = false)
     private LocalDateTime dateFinished;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+
+    @ManyToMany(cascade = {CascadeType.MERGE})
+    @JoinTable(name = "animes_genres",
+            joinColumns = @JoinColumn(name = "anime_id"),
+            inverseJoinColumns = @JoinColumn(name = "genres_id"))
+    @ToString.Exclude
+    private List<Genre> genres;
+
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE, optional = false)
     @JoinColumn(name = "studio_id", nullable = false)
     @ToString.Exclude
     private Studio studio;
-
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            },
-            mappedBy = "animeSet")
-    @ToString.Exclude
-    private Set<Genre> genres = new HashSet<>();
-
 
     @Override
     public boolean equals(Object o) {
