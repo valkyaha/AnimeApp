@@ -12,4 +12,6 @@ public interface AnimeService {
     Page<AnimeDTO> getAllAnime(Integer pageNo, Integer pageSize, String sortBy);
 
     void saveAnime(AnimeDTO dto);
+
+    AnimeDTO updateAnime(AnimeDTO dto) throws NotFoundException;
 }

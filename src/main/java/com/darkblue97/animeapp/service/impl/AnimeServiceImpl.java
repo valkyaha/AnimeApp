@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -34,5 +33,10 @@ public class AnimeServiceImpl implements AnimeService {
     @Override
     public void saveAnime(AnimeDTO dto) {
         daoInterface.save(dto);
+    }
+
+    @Override
+    public AnimeDTO updateAnime(AnimeDTO dto) throws NotFoundException {
+        return daoInterface.update(dto);
     }
 }
